@@ -16,11 +16,14 @@ func TestUnpack(t *testing.T) {
 		{input: "abccd", expected: "abccd"},
 		{input: "", expected: ""},
 		{input: "aaa0b", expected: "aab"},
-		// uncomment if task with asterisk completed
-		// {input: `qwe\4\5`, expected: `qwe45`},
-		// {input: `qwe\45`, expected: `qwe44444`},
-		// {input: `qwe\\5`, expected: `qwe\\\\\`},
-		// {input: `qwe\\\3`, expected: `qwe\3`},
+		{input: `qwe\4\5`, expected: `qwe45`},
+		{input: `qwe\45`, expected: `qwe44444`},
+		{input: `qwe\\5`, expected: `qwe\\\\\`},
+		{input: `qwe\\\3`, expected: `qwe\3`},
+		{input: `a\\b3ac3\\`, expected: `a\bbbaccc\`},
+		{input: "вг3ф0он", expected: "вгггон"},
+		{input: "১২৩", expected: "১২৩"},
+		{input: `১২৩3🍁\6`, expected: "১২৩৩৩🍁6"},
 	}
 
 	for _, tc := range tests {
@@ -33,13 +36,35 @@ func TestUnpack(t *testing.T) {
 	}
 }
 
-func TestUnpackInvalidString(t *testing.T) {
-	invalidStrings := []string{"3abc", "45", "aaa10b"}
+func TestUnpackInvalidStringEnding(t *testing.T) {
+	invalidStrings := []string{`\3abc\`, `la4k0\`}
 	for _, tc := range invalidStrings {
 		tc := tc
 		t.Run(tc, func(t *testing.T) {
 			_, err := Unpack(tc)
-			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
+			require.Truef(t, errors.Is(err, ErrInvalidStringEnding), "actual error %q", err)
+		})
+	}
+}
+
+func TestUnpackDigitWrongPlace(t *testing.T) {
+	invalidStrings := []string{"a33abc", "45", "aaa10b"}
+	for _, tc := range invalidStrings {
+		tc := tc
+		t.Run(tc, func(t *testing.T) {
+			_, err := Unpack(tc)
+			require.Truef(t, errors.Is(err, ErrDigitWrongPlace), "actual error %q", err)
+		})
+	}
+}
+
+func TestUnpackEscapingLimit(t *testing.T) {
+	invalidStrings := []string{`\a33abc`, `a4d5\д`}
+	for _, tc := range invalidStrings {
+		tc := tc
+		t.Run(tc, func(t *testing.T) {
+			_, err := Unpack(tc)
+			require.Truef(t, errors.Is(err, ErrEscapingLimit), "actual error %q", err)
 		})
 	}
 }
