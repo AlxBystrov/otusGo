@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	// "unicode"
 )
 
 var (
@@ -54,8 +53,8 @@ func Unpack(t string) (string, error) {
 				continue
 			}
 			// Check on repeat
-			if nextNum, err := strconv.Atoi(string(gliphs[i+2])); err == nil {
-				fmt.Fprintf(&result, "%s", strings.Repeat(string(gliphs[i+1]), nextNum))
+			if nextNum, err := strconv.Atoi(gliphs[i+2]); err == nil {
+				fmt.Fprintf(&result, "%s", strings.Repeat(gliphs[i+1], nextNum))
 				i += 2
 			} else {
 				fmt.Fprintf(&result, "%v", gliphs[i+1])
@@ -65,8 +64,8 @@ func Unpack(t string) (string, error) {
 		}
 
 		// Use Repeat when the next char is digit and increase counter
-		if num, err := strconv.Atoi(string(gliphs[i+1])); err == nil {
-			fmt.Fprintf(&result, "%s", strings.Repeat(string(gliphs[i]), num))
+		if num, err := strconv.Atoi(gliphs[i+1]); err == nil {
+			fmt.Fprintf(&result, "%s", strings.Repeat(gliphs[i], num))
 			i++
 		} else {
 			fmt.Fprintf(&result, "%v", gliphs[i])
