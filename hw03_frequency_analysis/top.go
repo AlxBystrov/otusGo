@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	reSymbols = regexp.MustCompile(`(\t|\n|\. |, |!|"|;|- )`)
+	reSymbols = regexp.MustCompile(`(\t|\n|\. |, |!|"|;| - )`)
 	reSpace   = regexp.MustCompile(`\s+`)
 )
 
@@ -21,7 +21,7 @@ func Top10(s string) []string {
 
 	// clean string from unnecessary symbols and split
 	cleanedS := reSpace.ReplaceAllString(reSymbols.ReplaceAllString(strings.ToLower(s), " "), " ")
-	words := strings.Split(cleanedS, " ")
+	words := strings.Fields(cleanedS)
 
 	// init map which will be used as counter
 	stat = make(map[string]int)
@@ -51,7 +51,7 @@ func Top10(s string) []string {
 	equalStart := 0
 	for idx := range allKeys {
 		if idx == len(allKeys)-1 && equal {
-			sort.Strings(allKeys[equalStart:idx])
+			sort.Strings(allKeys[equalStart:])
 			continue
 		}
 		if idx == len(allKeys)-1 && !equal {

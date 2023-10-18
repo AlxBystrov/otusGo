@@ -80,3 +80,25 @@ func TestTop10(t *testing.T) {
 		}
 	})
 }
+
+func TestShortCases(t *testing.T) {
+	type ShortCase struct {
+		name string
+		text string
+		want []string
+	}
+
+	shortCases := []ShortCase{
+		{
+			name: "first short case",
+			text: "Peoples running ----- peoples fake, two and two. And - more two peoples!",
+			want: []string{"peoples", "two", "and", "-----", "fake", "more", "running"},
+		},
+	}
+
+	for _, val := range shortCases {
+		t.Run(val.name, func(t *testing.T) {
+			require.Equal(t, val.want, Top10(val.text))
+		})
+	}
+}
