@@ -28,13 +28,7 @@ func Top10(s string) []string {
 
 	// iterate on words slice and increase counter
 	for _, word := range words {
-		_, ok := stat[word]
-
-		if ok {
-			stat[word]++
-		} else {
-			stat[word] = 1
-		}
+		stat[word]++
 	}
 
 	// get all keys from map
