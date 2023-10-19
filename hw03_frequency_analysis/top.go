@@ -38,13 +38,13 @@ func Top10(s string) []string {
 	}
 
 	// sort keys slice by value of stat map
-	sort.Slice(allKeys, func(i, j int) bool { 
-	a, b := allKeys[i], allKeys[j]
-	if stat[a] == stat[b] {
+	sort.Slice(allKeys, func(i, j int) bool {
+		a, b := allKeys[i], allKeys[j]
+		if stat[a] == stat[b] {
 			return a < b
 		}
-	return stat[a] > stat[b]
-	 })
+		return stat[a] > stat[b]
+	})
 
 	// return only first 10 if more than it
 	if len(allKeys) > 10 {
