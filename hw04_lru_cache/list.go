@@ -64,7 +64,6 @@ func (l *list) PushBack(v interface{}) *ListItem {
 }
 
 func (l *list) Remove(i *ListItem) {
-
 	// when the item is front
 	if i.Prev == nil && i.Next != nil {
 		i.Next.Prev = nil
@@ -83,7 +82,6 @@ func (l *list) Remove(i *ListItem) {
 }
 
 func (l *list) MoveToFront(i *ListItem) {
-
 	// when the item is not front and not back
 	if i.Prev != nil && i.Next != nil {
 		i.Prev.Next = i.Next
