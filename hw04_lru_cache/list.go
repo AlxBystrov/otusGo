@@ -101,6 +101,5 @@ func (l *list) MoveToFront(i *ListItem) {
 }
 
 func NewList() List {
-	newList := new(list)
-	return newList
+	return new(list)
 }
