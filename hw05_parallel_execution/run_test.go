@@ -35,7 +35,10 @@ func TestRun(t *testing.T) {
 		err := Run(tasks, workersCount, maxErrorsCount)
 
 		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
-		require.LessOrEqual(t, runTasksCount, int32(workersCount+maxErrorsCount), "extra tasks were started")
+		require.LessOrEqual(t,
+			atomic.LoadInt32(&runTasksCount),
+			int32(workersCount+maxErrorsCount),
+			"extra tasks were started")
 	})
 
 	t.Run("tasks without errors", func(t *testing.T) {
@@ -64,7 +67,68 @@ func TestRun(t *testing.T) {
 		elapsedTime := time.Since(start)
 		require.NoError(t, err)
 
-		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
+		require.Equal(t, atomic.LoadInt32(&runTasksCount), int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
+	})
+
+	t.Run("concurrency test", func(t *testing.T) {
+		tasksCount := 50
+		tasks := make([]Task, 0, tasksCount)
+
+		var runTasksCount int32
+		var sumTime time.Duration
+
+		for i := 0; i < tasksCount; i++ {
+			taskSleep := time.Millisecond * time.Duration(rand.Intn(100))
+			sumTime += taskSleep
+
+			tasks = append(tasks, func() error {
+				time.Sleep(taskSleep)
+				atomic.AddInt32(&runTasksCount, 1)
+				return nil
+			})
+		}
+
+		workersCount := 4
+		maxErrorsCount := 0
+
+		require.Eventually(t,
+			func() bool {
+				err := Run(tasks, workersCount, maxErrorsCount)
+				return err == nil
+			},
+			sumTime/2, sumTime/10, "tasks were run sequentially?")
+	})
+
+	t.Run("ignoring errors when m <= 0", func(t *testing.T) {
+		tasksCount := 30
+		tasks := make([]Task, 0, tasksCount)
+
+		var runTasksCount int32
+
+		funcWithError := func() error {
+			time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))
+			atomic.AddInt32(&runTasksCount, 1)
+			return errors.New("task execution error")
+		}
+
+		funcNoError := func() error {
+			time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))
+			atomic.AddInt32(&runTasksCount, 1)
+			return nil
+		}
+
+		chooseTask := []Task{funcNoError, funcWithError}
+
+		for i := 0; i < tasksCount; i++ {
+			tasks = append(tasks, chooseTask[rand.Intn(2)])
+		}
+
+		workersCount := 10
+		maxErrorsCount := 0
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.Truef(t, errors.Is(err, nil), "well done, no error")
+		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 	})
 }
