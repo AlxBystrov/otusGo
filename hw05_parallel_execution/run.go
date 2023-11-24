@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	ErrErrorsLimitExceeded  = errors.New("errors limit exceeded")
-	ErrTooLowGorutineNumber = errors.New("at least two gorutine must be specified for concurrently execution")
+	ErrErrorsLimitExceeded   = errors.New("errors limit exceeded")
+	ErrTooLowGoroutineNumber = errors.New("at least two goroutine must be specified for concurrently execution")
 )
 
 type Task func() error
@@ -16,7 +16,7 @@ type Task func() error
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
 	if n < 2 {
-		return ErrTooLowGorutineNumber
+		return ErrTooLowGoroutineNumber
 	}
 	var errCount int32
 	chTask := make(chan Task)
