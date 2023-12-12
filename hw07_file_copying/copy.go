@@ -77,7 +77,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	source.Seek(offset, 0)
 	for i := offset; i < limit+offset; i += chunkSize {
 		bytesCopied, err := io.CopyN(dest, source, chunkSize)
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
