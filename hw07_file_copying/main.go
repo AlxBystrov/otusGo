@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
-	"log/slog"
+	"fmt"
 )
 
 var (
@@ -23,10 +23,10 @@ func main() {
 	flag.Parse()
 
 	if from == "" || to == "" {
-		slog.Error("empty argument", "error", ErrMissingArgs)
+		fmt.Printf("error: %s", ErrMissingArgs)
 		return
 	}
 	if err := Copy(from, to, offset, limit); err != nil {
-		slog.Error("failed to copy file", "error", err)
+		fmt.Printf("failed to copy file: %s", err)
 	}
 }
