@@ -1,12 +1,15 @@
 package main
 
 import (
+	"errors"
 	"flag"
+	"fmt"
 )
 
 var (
-	from, to      string
-	limit, offset int64
+	from, to       string
+	limit, offset  int64
+	ErrMissingArgs = errors.New("missing required arguments: [from, to]")
 )
 
 func init() {
@@ -18,5 +21,12 @@ func init() {
 
 func main() {
 	flag.Parse()
-	// Place your code here.
+
+	if from == "" || to == "" {
+		fmt.Printf("error: %s", ErrMissingArgs)
+		return
+	}
+	if err := Copy(from, to, offset, limit); err != nil {
+		fmt.Printf("failed to copy file: %s", err)
+	}
 }
