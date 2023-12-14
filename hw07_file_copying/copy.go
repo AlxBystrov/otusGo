@@ -13,7 +13,6 @@ const chunkSize = 1
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
-	ErrFileReading           = errors.New("file reading error")
 )
 
 type ProgressBar struct {
