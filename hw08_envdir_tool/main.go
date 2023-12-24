@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log/slog"
+	"fmt"
 	"os"
 )
 
@@ -11,7 +11,7 @@ func main() {
 	cmd := args[2:]
 	env, err := ReadDir(dir)
 	if err != nil {
-		slog.Error("error while reading env in dir", "dir", dir, "error", err)
+		fmt.Printf("error while reading env in dir %s: %s", dir, err)
 		return
 	}
 	resultCode := RunCmd(cmd, env)
