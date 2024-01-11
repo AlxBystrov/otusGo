@@ -1,66 +1,72 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
+
+	"github.com/valyala/fastjson"
 )
 
 type User struct {
-	ID       int
-	Name     string
-	Username string
-	Email    string
-	Phone    string
-	Password string
-	Address  string
+	ID int
+	// Name     string
+	// Username string
+	Email string
+	// Phone    string
+	// Password string
+	// Address  string
 }
 
 type DomainStat map[string]int
+type users []User
+
+var p fastjson.Parser
+
+func parseLine(line string, domain string, result *DomainStat) error {
+	var user User
+	v, err := p.Parse(line)
+	if err != nil {
+		return err
+	}
+	user = User{
+		ID: v.GetInt("Id"),
+		// Name:     string(v.GetStringBytes("Name")),
+		// Username: string(v.GetStringBytes("Username")),
+		Email: string(v.GetStringBytes("Email")),
+		// Phone:    string(v.GetStringBytes("Phone")),
+		// Password: string(v.GetStringBytes("Password")),
+		// Address:  string(v.GetStringBytes("Address")),
+	}
+	if strings.HasSuffix(user.Email, "."+domain) {
+		num := (*result)[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
+		num++
+		(*result)[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+	}
+
+	return nil
+}
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers(r)
+	userStat, err := getUsersStat(r, domain)
 	if err != nil {
 		return nil, fmt.Errorf("get users error: %w", err)
 	}
-	return countDomains(u, domain)
+	return userStat, nil
 }
 
-type users [100_000]User
-
-func getUsers(r io.Reader) (result users, err error) {
+func getUsersStat(r io.Reader, domain string) (DomainStat, error) {
+	result := make(DomainStat)
 	content, err := io.ReadAll(r)
 	if err != nil {
-		return
+		return result, err
 	}
 
 	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
-		}
-		result[i] = user
-	}
-	return
-}
-
-func countDomains(u users, domain string) (DomainStat, error) {
-	result := make(DomainStat)
-
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
-		}
-
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+	for _, line := range lines {
+		if err = parseLine(line, domain, &result); err != nil {
+			return result, err
 		}
 	}
-	return result, nil
+	return result, err
 }
