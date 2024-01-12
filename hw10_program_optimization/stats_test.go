@@ -1,9 +1,11 @@
+//go:build !bench
 // +build !bench
 
 package hw10programoptimization
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -36,4 +38,42 @@ func TestGetDomainStat(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, DomainStat{}, result)
 	})
+}
+
+func TestParseLine(t *testing.T) {
+	type testCase struct {
+		name           string
+		line           string
+		domain         string
+		expectedResult DomainStat
+		expectedError  error
+	}
+
+	var errUnexpectedEndJSON = errors.New("cannot parse JSON: cannot parse object: unexpected end of object; unparsed tail: \"\"")
+
+	testCases := []testCase{
+		{
+			name:           "valid json",
+			line:           "{\"Id\":1,\"Name\":\"Howard Mendoza\",\"Username\":\"0Oliver\",\"Email\":\"aliquid_qui_ea@Browsedrive.gov\",\"Phone\":\"6-866-899-36-79\",\"Password\":\"InAQJvsq\",\"Address\":\"Blackbird Place 25\"}",
+			domain:         "gov",
+			expectedResult: DomainStat{"browsedrive.gov": 1},
+			expectedError:  nil,
+		},
+		{
+			name:           "invalid json",
+			line:           "{\"Id\":1,\"Name\":\"Howard Mendoza\",\"Username\":\"0Oliver\",\"Email\":\"aliquid_qui_ea@Browsedrive.gov\",\"Phone\":\"6-866-899-36-79\",\"Password\":\"InAQJvsq\",\"Address\":\"Blackbird Place 25\"",
+			domain:         "gov",
+			expectedResult: DomainStat{},
+			expectedError:  errUnexpectedEndJSON,
+		},
+	}
+
+	for _, test := range testCases {
+		ds := make(DomainStat)
+		t.Run(test.name, func(t *testing.T) {
+			err := parseLine(test.line, test.domain, &ds)
+			require.Equal(t, test.expectedError, err)
+			require.Equal(t, test.expectedResult, ds)
+		})
+	}
 }
