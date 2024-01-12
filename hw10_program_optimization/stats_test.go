@@ -4,8 +4,10 @@
 package hw10programoptimization
 
 import (
+	"archive/zip"
 	"bytes"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -76,4 +78,26 @@ func TestParseLine(t *testing.T) {
 			require.Equal(t, test.expectedResult, ds)
 		})
 	}
+}
+
+func BenchmarkGetDomainStat(b *testing.B) {
+	r, err := zip.OpenReader("testdata/users.dat.zip")
+	if err != nil {
+		return
+	}
+	defer r.Close()
+
+	data, err := r.File[0].Open()
+	if err != nil {
+		return
+	}
+	for i := 0; i < b.N; i++ {
+		stat, err := GetDomainStat(data, "biz")
+		if err != nil {
+			fmt.Printf("error on executing GetDomainStat: %s\n", err)
+			return
+		}
+		_ = stat
+	}
+
 }
