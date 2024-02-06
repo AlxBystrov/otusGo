@@ -39,10 +39,7 @@ func NewServer(logger Logger, app Application, host string, port int) *Server {
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	health := func(w http.ResponseWriter, _ *http.Request) {
-		io.WriteString(w, "health is ok")
-	}
-	http.HandleFunc("/health", health)
+	http.HandleFunc("/health", loggingMiddleware(s.Health))
 
 	if err := s.srv.ListenAndServe(); err != nil {
 		s.logger.Error("HTTP server failed", "error", err)
