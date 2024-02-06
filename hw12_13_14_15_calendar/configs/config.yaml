@@ -1,4 +1,8 @@
 logger:
-  level: INFO
-
-
+  level: debug
+  handler: text # text or json
+storage:
+  type: memory
+server:
+  host: localhost
+  port: 8080

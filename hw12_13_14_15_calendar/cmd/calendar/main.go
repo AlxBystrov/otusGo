@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,10 +11,12 @@ import (
 	"github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/app"
 	"github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/storage/memory"
+	memoryStorage "github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
-var configFile string
+var (
+	configFile string
+)
 
 func init() {
 	flag.StringVar(&configFile, "config", "/etc/calendar/config.yaml", "Path to configuration file")
@@ -31,12 +32,21 @@ func main() {
 
 	config := NewConfig()
 
-	logg := logger.New(config.Logger.Level)
+	logg := logger.New(os.Stdout, config.Logger.Level, config.Logger.Handler)
 
-	storage := memorystorage.New()
+	var storage app.Storage
+	switch config.Storage.Type {
+	case "memory":
+		storage = memoryStorage.New()
+	case "sql":
+		// storage = sqlStorage.New()
+	default:
+		logg.Error("configuration error: storage type must be memory or sql", "storage", config.Storage.Type)
+		os.Exit(1)
+	}
+
 	calendar := app.New(logg, storage)
-
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(logg, calendar, config.Server.Host, config.Server.Port)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

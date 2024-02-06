@@ -1,8 +1,9 @@
 package logger
 
 import (
+	"io"
+	"log"
 	"log/slog"
-	"os"
 	"strings"
 )
 
@@ -18,19 +19,21 @@ var levelMap = map[string]int{
 	"error":   4,
 }
 
-func New(level string, handler string) *Logger {
+func New(w io.Writer, level string, handler string) *Logger {
 	levelInt, ok := levelMap[strings.ToLower(level)]
 	if !ok {
+		log.Printf("failed to set level for %s value, used INFO as default\n", level)
 		levelInt = 2 // use info as default level
 	}
+
 	var loggerHandler *slog.Logger
 	switch handler {
 	case "text":
-		loggerHandler = slog.New(slog.NewTextHandler(os.Stdout, nil))
+		loggerHandler = slog.New(slog.NewTextHandler(w, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	case "json":
-		loggerHandler = slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		loggerHandler = slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	default:
-		loggerHandler = slog.New(slog.NewTextHandler(os.Stdout, nil))
+		loggerHandler = slog.New(slog.NewTextHandler(w, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	}
 	return &Logger{
 		level:  levelInt,
@@ -38,25 +41,25 @@ func New(level string, handler string) *Logger {
 	}
 }
 
-func (l Logger) Debug(msg string, args ...any) {
+func (l *Logger) Debug(msg string, args ...any) {
 	if l.level <= levelMap["debug"] {
 		l.logger.Debug(msg, args...)
 	}
 }
 
-func (l Logger) Info(msg string, args ...any) {
+func (l *Logger) Info(msg string, args ...any) {
 	if l.level <= levelMap["info"] {
 		l.logger.Info(msg, args...)
 	}
 }
 
-func (l Logger) Warning(msg string, args ...any) {
+func (l *Logger) Warning(msg string, args ...any) {
 	if l.level <= levelMap["warning"] {
 		l.logger.Warn(msg, args...)
 	}
 }
 
-func (l Logger) Error(msg string, args ...any) {
+func (l *Logger) Error(msg string, args ...any) {
 	if l.level <= levelMap["error"] {
 		l.logger.Error(msg, args...)
 	}
