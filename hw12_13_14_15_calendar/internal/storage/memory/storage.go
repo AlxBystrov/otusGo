@@ -22,12 +22,16 @@ func New() *Storage {
 var (
 	ErrEventIDExists  = errors.New("the specified ID is already in use")
 	ErrEventIDMissing = errors.New("the specified ID is not present")
+	ErrDateBusy       = errors.New("specified date for event is busy")
 )
 
 func (s *Storage) CreateEvent(event storage.Event) (storage.Event, error) {
 	_, ok := s.events[event.ID]
 	if ok {
 		return storage.Event{}, ErrEventIDExists
+	}
+	if s.IsDateBusy(event.Date, event.Duration) {
+		return storage.Event{}, ErrDateBusy
 	}
 	s.mu.Lock()
 	s.events[event.ID] = event
@@ -88,4 +92,14 @@ func (s *Storage) GetEventsMonth(day time.Time) []storage.Event {
 		}
 	}
 	return result
+}
+
+func (s *Storage) IsDateBusy(date time.Time, duration time.Duration) bool {
+	for _, event := range s.events {
+		if event.Date.Before(date) && event.Date.Add(event.Duration).After(date) ||
+			event.Date.Before(date.Add(duration)) && event.Date.Add(event.Duration).After(date.Add(duration)) {
+			return true
+		}
+	}
+	return false
 }

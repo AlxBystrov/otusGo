@@ -19,7 +19,7 @@ func TestStorage(t *testing.T) {
 		},
 		{
 			ID: "2", Title: "two",
-			Date:     time.Now().Add(time.Minute * 30),
+			Date:     time.Now().Add(time.Hour * 2),
 			Duration: time.Hour, Description: "description 2",
 			UserID: "1", NotifyBefore: time.Hour,
 		},
@@ -80,5 +80,16 @@ func TestStorage(t *testing.T) {
 		require.Equal(t, nil, err)
 		ev := storageTest.GetEventsMonth(time.Now())
 		require.Equal(t, 3, len(ev))
+	})
+
+	busyEvent := storage.Event{
+		ID: "5", Title: "five",
+		Date:     time.Now().Add(time.Minute * 30),
+		Duration: time.Hour, Description: "description 5",
+		UserID: "2", NotifyBefore: time.Hour,
+	}
+	t.Run("busy date test", func(t *testing.T) {
+		_, err := storageTest.CreateEvent(busyEvent)
+		require.EqualError(t, ErrDateBusy, err.Error())
 	})
 }
