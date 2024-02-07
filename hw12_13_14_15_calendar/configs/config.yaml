@@ -2,7 +2,12 @@ logger:
   level: debug
   handler: text # text or json
 storage:
-  type: memory
+  type: sql
+  host: localhost
+  port: 5432
+  database: calendar
+  user: postgres
+  password: strong
 server:
   host: localhost
   port: 8080

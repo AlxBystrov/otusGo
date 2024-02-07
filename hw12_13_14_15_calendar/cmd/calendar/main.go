@@ -12,6 +12,7 @@ import (
 	"github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/server/http"
 	memoryStorage "github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlStorage "github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var (
@@ -39,7 +40,7 @@ func main() {
 	case "memory":
 		storage = memoryStorage.New()
 	case "sql":
-		// storage = sqlStorage.New()
+		storage = sqlStorage.New(config.Storage.Host, config.Storage.Port, config.Storage.Database, config.Storage.User, config.Storage.Password)
 	default:
 		logg.Error("configuration error: storage type must be memory or sql", "storage", config.Storage.Type)
 		os.Exit(1)

@@ -22,7 +22,12 @@ type LoggerConf struct {
 }
 
 type StorageConf struct {
-	Type string `yaml:"type"`
+	Type     string `yaml:"type"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Database string `yaml:"daatbase"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
 }
 
 type ServerConf struct {
