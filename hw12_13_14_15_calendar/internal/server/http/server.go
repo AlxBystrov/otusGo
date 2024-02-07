@@ -26,6 +26,7 @@ type Logger interface {
 }
 
 type Application interface { // TODO
+	CreateEvent(ctx context.Context, id, title string) error
 }
 
 func NewServer(logger Logger, app Application, host string, port int) *Server {
@@ -54,5 +55,3 @@ func (s *Server) Stop(ctx context.Context) error {
 	}
 	return nil
 }
-
-// TODO

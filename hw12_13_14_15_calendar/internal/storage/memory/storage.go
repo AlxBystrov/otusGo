@@ -61,7 +61,7 @@ func (s *Storage) GetEventsDay(day time.Time) []storage.Event {
 	var result []storage.Event
 
 	for _, event := range s.events {
-		if event.Date.Equal(day) {
+		if event.Date.Truncate(24 * time.Hour).Equal(day.Truncate(24 * time.Hour)) {
 			result = append(result, event)
 		}
 	}
