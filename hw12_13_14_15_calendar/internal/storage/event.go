@@ -8,6 +8,6 @@ type Event struct {
 	Date         time.Time
 	Duration     time.Duration
 	Description  string
-	UserID       string
+	UserID       int
 	NotifyBefore time.Duration
 }

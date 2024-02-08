@@ -15,30 +15,30 @@ func TestStorage(t *testing.T) {
 			ID: "1", Title: "one",
 			Date:     time.Now().Add(time.Hour),
 			Duration: time.Hour, Description: "description 1",
-			UserID: "1", NotifyBefore: time.Hour,
+			UserID: 1, NotifyBefore: time.Hour,
 		},
 		{
 			ID: "2", Title: "two",
 			Date:     time.Now().Add(time.Hour * 2),
 			Duration: time.Hour, Description: "description 2",
-			UserID: "1", NotifyBefore: time.Hour,
+			UserID: 1, NotifyBefore: time.Hour,
 		},
 		{
 			ID: "3", Title: "three",
 			Date:     time.Now().Add(time.Hour * 24 * 5),
 			Duration: time.Hour, Description: "description 3",
-			UserID: "2", NotifyBefore: time.Hour,
+			UserID: 2, NotifyBefore: time.Hour,
 		},
 		{
 			ID: "4", Title: "four",
 			Date:     time.Now().Add(time.Hour * 24 * 10),
 			Duration: time.Hour, Description: "description 4",
-			UserID: "2", NotifyBefore: time.Hour,
+			UserID: 2, NotifyBefore: time.Hour,
 		},
 	}
 
 	storageTest := New()
-
+	t.Parallel()
 	t.Run("add events test", func(t *testing.T) {
 		for _, event := range events {
 			storedEvent, err := storageTest.CreateEvent(event)
@@ -66,7 +66,7 @@ func TestStorage(t *testing.T) {
 		ID: "3", Title: "three",
 		Date:     time.Now().Add(time.Hour * 48),
 		Duration: time.Hour, Description: "description 3",
-		UserID: "2", NotifyBefore: time.Hour,
+		UserID: 2, NotifyBefore: time.Hour,
 	}
 
 	t.Run("update event test", func(t *testing.T) {
@@ -86,7 +86,7 @@ func TestStorage(t *testing.T) {
 		ID: "5", Title: "five",
 		Date:     time.Now().Add(time.Minute * 30),
 		Duration: time.Hour, Description: "description 5",
-		UserID: "2", NotifyBefore: time.Hour,
+		UserID: 2, NotifyBefore: time.Hour,
 	}
 	t.Run("busy date test", func(t *testing.T) {
 		_, err := storageTest.CreateEvent(busyEvent)

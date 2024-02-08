@@ -6,17 +6,10 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"time"
+
+	"github.com/AlxBystrov/otusGo/hw12_13_14_15_calendar/internal/storage"
 )
-
-type Server struct {
-	logger Logger
-	app    Application
-	srv    http.Server
-}
-
-func (s *Server) Health(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "health is ok")
-}
 
 type Logger interface {
 	Debug(string, ...any)
@@ -26,7 +19,12 @@ type Logger interface {
 }
 
 type Application interface { // TODO
-	CreateEvent(ctx context.Context, id, title string) error
+	CreateEvent(ctx context.Context, title, description string, date time.Time, duration, notifyBefore time.Duration, userID int) (storage.Event, error)
+}
+type Server struct {
+	logger Logger
+	app    Application
+	srv    http.Server
 }
 
 func NewServer(logger Logger, app Application, host string, port int) *Server {
@@ -41,6 +39,7 @@ func NewServer(logger Logger, app Application, host string, port int) *Server {
 
 func (s *Server) Start(ctx context.Context) error {
 	http.HandleFunc("/health", loggingMiddleware(s.Health))
+	http.HandleFunc("/createEvent", loggingMiddleware(s.CreateEvent))
 
 	if err := s.srv.ListenAndServe(); err != nil {
 		s.logger.Error("HTTP server failed", "error", err)
@@ -54,4 +53,13 @@ func (s *Server) Stop(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Server) Health(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "health is ok")
+}
+
+func (s *Server) CreateEvent(w http.ResponseWriter, r *http.Request) {
+
+	io.WriteString(w, "{\"data\": \"ok\"}")
 }
